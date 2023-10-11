@@ -34,4 +34,5 @@ const UpDatePet = async (petId, name, type, image, adopted) => {
   });
   return res.data;
 };
+
 export { GetAllPets, GetOnePet, CreatNewPet, DeletPet, UpDatePet };

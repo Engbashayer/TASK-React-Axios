@@ -1,31 +1,56 @@
 import React from "react";
-import { Link, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { DeletPet, GetOnePet, UpDatePet } from "../api/pets";
 import { useState } from "react";
 import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 const PetDetail = () => {
   const { petId } = useParams();
+  const navigate = useNavigate();
 
-  const [pet, setPet] = useState({});
+  const queryClient = useQueryClient();
+  const { data: pet, isLoading } = useQuery({
+    queryKey: ["pet", petId],
+    queryFn: () => GetOnePet(petId),
+  });
 
-  const CallAPI = async () => {
-    const res = await GetOnePet(petId);
+  const { mutate: update } = useMutation({
+    mutationFn: () => UpDatePet(petId, pet.name, pet.type, pet.image),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["pet", petId]);
+    },
+  });
 
-    setPet(res);
-  };
-  console.log(pet);
-  useEffect(() => {
-    CallAPI();
-  }, []);
+  const { mutate: delet } = useMutation({
+    mutationFn: () => DeletPet(petId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["pets"]);
+      navigate("/pets");
+    },
+  });
+
+  if (isLoading) return <h1> Loading .... </h1>;
+  // const [pet, setPet] = useState({});
+
+  // const CallAPI = async () => {
+  //   const res = await GetOnePet(petId);
+
+  //   setPet(res);
+  // };
+  // console.log(pet);
+  // useEffect(() => {
+  //   CallAPI();
+  // }, []);
 
   // const pet = petsData.find((pet) => {
   //   return pet.id == petId;
   // });
 
-  if (!pet) {
-    return <h1>there is no pet with id = {petId}</h1>;
-  }
+  // if (!pet) {
+  //   return <Navigate to="/not-found" />;
+  // }
 
   return (
     <div className="bg-[#F9E3BE] w-screen h-[100vh] flex justify-center items-center">
@@ -45,7 +70,7 @@ const PetDetail = () => {
           <button
             className="w-[70px] border border-black rounded-md  hover:bg-green-400 mb-5"
             onClick={() => {
-              UpDatePet(petId, pet.name, pet.type, pet.image);
+              update();
             }}
           >
             Adobt
@@ -54,7 +79,7 @@ const PetDetail = () => {
           <button
             className="w-[70px] border border-black rounded-md  hover:bg-red-400"
             onClick={() => {
-              DeletPet(petId);
+              delet(petId);
             }}
           >
             Delete

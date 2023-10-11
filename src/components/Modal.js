@@ -1,11 +1,23 @@
 import React, { useState } from "react";
 import Input from "./Input";
 import { CreatNewPet } from "../api/pets";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 const Modal = ({ show, setShowModal }) => {
   const [name, setName] = useState("");
   const [type, setType] = useState("");
   const [image, setImage] = useState("");
   const [adopted, setAvailable] = useState(0);
+
+  const queryClient = useQueryClient();
+
+  const { mutate, isLoading } = useMutation({
+    mutationFn: () => CreatNewPet(name, type, image, adopted),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["pets"]);
+      setShowModal(false);
+    },
+  });
+
   if (!show) return "";
   return (
     <div
@@ -22,6 +34,8 @@ const Modal = ({ show, setShowModal }) => {
         >
           Close
         </button>
+
+        {/* {isLoading()?(<h1>is Loading ...</h1>) : ( */}
         <Input
           name="Pet Name"
           onChange={(e) => {
@@ -50,7 +64,7 @@ const Modal = ({ show, setShowModal }) => {
         <button
           className="w-[70px] border border-black rounded-md ml-auto mr-5 hover:bg-green-400"
           onClick={() => {
-            CreatNewPet(name, type, image, adopted);
+            mutate();
           }}
         >
           Submit

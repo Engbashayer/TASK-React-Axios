@@ -6,6 +6,7 @@ import PetItem from "./components/PetItem";
 import PetList from "./components/PetList";
 import { Routes, Route } from "react-router-dom";
 import axios from "axios";
+import NotFound from "./components/NotFound";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/" Component={Home} />
         <Route path="/pets" Component={PetList} />
         <Route path="/pets/:petId" Component={PetDetail} />
+        <Route path="/*" Component={NotFound} />
       </Routes>
     </div>
   );
